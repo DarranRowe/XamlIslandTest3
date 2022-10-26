@@ -28,14 +28,24 @@ void except_filter()
 	{
 		throw;
 	}
-	catch (winrt::hresult_error &)
+	catch (winrt::hresult_error &he)
 	{
+		auto fmtstr = std::format(L"Message: {}, Code: {}", std::wstring_view(he.message()), int32_t(he.code()));
+		MessageBoxW(nullptr, fmtstr.c_str(), L"Exception Thrown", MB_ICONERROR | MB_OK);
 	}
-	catch (wil::ResultException &)
+	catch (wil::ResultException &re)
 	{
+		//Use hstring to get a wide version of what.
+		auto what_str = winrt::to_hstring(re.what());
+		auto fmtstr = std::format(L"What: {}, Code: {}", what_str, re.GetErrorCode());
+		MessageBoxW(nullptr, fmtstr.c_str(), L"Exception Thrown", MB_ICONERROR | MB_OK);
 	}
-	catch (std::exception &)
+	catch (std::exception &e)
 	{
+		//Use hstring to get a wide version of what.
+		auto what_str = winrt::to_hstring(e.what());
+		auto fmtstr = std::format(L"What: {}", what_str);
+		MessageBoxW(nullptr, fmtstr.c_str(), L"Exception Thrown", MB_ICONERROR | MB_OK);
 	}
 }
 
@@ -85,6 +95,7 @@ int WINAPI wWinMain(_In_ HINSTANCE inst, _In_opt_ HINSTANCE, _In_ LPWSTR cmdline
 	catch (...)
 	{
 		except_filter();
+		result = -254;
 	}
 	return result;
 }
